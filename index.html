@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f2ed" />
+    <title>Montørskisse</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=36" />
+  </head>
+  <body>
+    <main class="app" aria-label="Redigeringsverktøy for nettmerking på skjermbilde">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Montørskisse</span>
+          <button class="icon-btn topbar-toggle" id="topbarToggle" type="button" aria-label="Minimer toppfelt" aria-pressed="false">
+            <span class="mini-icon collapse" aria-hidden="true"></span>
+          </button>
+          <div class="compact-quick-actions" aria-label="Hurtigknapper">
+            <button class="icon-btn" id="compactUndoBtn" type="button" aria-label="Angre" disabled>
+              <span class="mini-icon undo" aria-hidden="true"></span>
+            </button>
+            <button class="icon-btn" id="compactRedoBtn" type="button" aria-label="Gjør om" disabled>
+              <span class="mini-icon redo" aria-hidden="true"></span>
+            </button>
+            <button class="icon-btn" id="compactClearBtn" type="button" aria-label="Tøm markeringer" disabled>
+              <span class="mini-icon trash" aria-hidden="true"></span>
+            </button>
+            <button class="icon-btn wide" id="compactFitBtn" type="button" aria-label="Tilpass bilde">Tilpass</button>
+            <button class="icon-btn wide hidden" id="compactFinishPolylineBtn" type="button">Ferdig</button>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="btn primary" id="importBtn" type="button">
+            <span class="icon upload" aria-hidden="true"></span>
+            <span>Skjermbilde</span>
+          </button>
+          <button class="btn" id="saveProjectBtn" type="button">
+            <span class="icon save" aria-hidden="true"></span>
+            <span>Lagre</span>
+          </button>
+          <button class="btn" id="loadProjectBtn" type="button">
+            <span class="icon folder" aria-hidden="true"></span>
+            <span>Åpne</span>
+          </button>
+          <button class="btn accent" id="exportBtn" type="button" disabled>
+            <span class="icon export" aria-hidden="true"></span>
+            <span>Eksporter</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="content">
+        <aside class="rail">
+          <div class="section-title">Verktøy</div>
+          <div class="segmented" role="group" aria-label="Tegneverktøy">
+            <button class="tool active" type="button" data-tool="select">
+              <span class="tool-glyph cursor" aria-hidden="true"></span>
+              <span>Velg</span>
+            </button>
+            <button class="tool" type="button" data-tool="line">
+              <span class="tool-glyph line" aria-hidden="true"></span>
+              <span>Linje</span>
+            </button>
+            <button class="tool" type="button" data-tool="polyline">
+              <span class="tool-glyph polyline" aria-hidden="true"></span>
+              <span>Polylinje</span>
+            </button>
+            <button class="tool" type="button" data-tool="measure">
+              <span class="tool-glyph measure" aria-hidden="true"></span>
+              <span>Meter</span>
+            </button>
+            <button class="tool" type="button" data-tool="pipe">
+              <span class="tool-glyph pipe" aria-hidden="true"></span>
+              <span>Rør</span>
+            </button>
+            <button class="tool" type="button" data-tool="object">
+              <span class="tool-glyph object" aria-hidden="true"></span>
+              <span>Objekt</span>
+            </button>
+            <button class="tool" type="button" data-tool="label">
+              <span class="tool-glyph label" aria-hidden="true"></span>
+              <span>Tekst</span>
+            </button>
+            <button class="tool" type="button" data-tool="signature">
+              <span class="tool-glyph signature" aria-hidden="true"></span>
+              <span>Underskrift</span>
+            </button>
+            <button class="tool danger" type="button" data-tool="erase">
+              <span class="tool-glyph erase" aria-hidden="true"></span>
+              <span>Slett</span>
+            </button>
+          </div>
+
+          <div class="tool-panel hidden" id="lineTypePanel">
+            <div class="section-title">Linjetype</div>
+            <div class="palette" id="linePalette" role="group" aria-label="Linjetype">
+              <button class="choice active" type="button" data-line-kind="primary">
+                <span class="swatch primary-line"></span>
+                <span>LS Kabel</span>
+              </button>
+              <button class="choice" type="button" data-line-kind="secondary">
+                <span class="swatch secondary-line"></span>
+                <span>HS Kabel</span>
+              </button>
+              <button class="choice" type="button" data-line-kind="service">
+                <span class="swatch service-line"></span>
+                <span>LS Luftledning</span>
+              </button>
+              <button class="choice" type="button" data-line-kind="underground">
+                <span class="swatch underground-line"></span>
+                <span>HS Luftledning</span>
+              </button>
+              <button class="choice" type="button" data-line-kind="proposed">
+                <span class="swatch proposed-line"></span>
+                <span>Planlagt</span>
+              </button>
+              <button class="choice" type="button" data-line-kind="arrowLine">
+                <span class="swatch"></span>
+                <span>Pil strek</span>
+              </button>
+            </div>
+
+            <div class="section-title">Valgt linjetype</div>
+            <div class="line-kind-editor" id="lineKindEditor"></div>
+          </div>
+
+          <label class="toggle">
+            <input id="snapToggle" type="checkbox" data-snap-toggle />
+            <span>Snap 45°</span>
+          </label>
+          <label class="toggle">
+            <input id="objectSnapToggle" type="checkbox" data-object-snap-toggle checked />
+            <span>Objektsnap</span>
+          </label>
+          <label class="toggle">
+            <input id="keepToolToggle" type="checkbox" data-keep-tool-toggle />
+            <span>Behold verktøy</span>
+          </label>
+          <div class="tool-panel hidden" id="textToolPanel">
+            <div class="section-title">Tekst</div>
+            <label class="toggle">
+              <input id="textArrowToggle" type="checkbox" data-text-arrow-toggle checked />
+              <span>Tekstpil</span>
+            </label>
+            <label class="field compact-field">
+              <span>Tekstpil terskel</span>
+              <div class="range-with-value">
+                <input id="textArrowThreshold" type="range" min="20" max="1000" step="5" value="1000" data-text-arrow-threshold />
+                <output data-text-arrow-threshold-readout>Uendelig</output>
+              </div>
+            </label>
+          </div>
+
+          <div class="tool-panel hidden" id="pipeTypePanel">
+            <div class="section-title">Rørtype</div>
+            <div class="palette" role="group" aria-label="Rørtype">
+              <button class="choice active" type="button" data-pipe-kind="power110">
+                <span class="swatch pipe-red"></span>
+                <span>110mm Rør</span>
+              </button>
+              <button class="choice" type="button" data-pipe-kind="fiber">
+                <span class="swatch pipe-yellow"></span>
+                <span>Fiber rør</span>
+              </button>
+            </div>
+            <div class="pipe-kind-editor hidden" id="pipeKindEditor"></div>
+          </div>
+
+          <div class="tool-panel hidden" id="signatureTypePanel">
+            <div class="section-title">Underskrift</div>
+            <div class="signature-profile" id="signatureProfilePanel"></div>
+          </div>
+        </aside>
+
+        <section class="stage-shell" aria-label="Skjermbilde lerret">
+          <div class="stage-toolbar">
+            <div class="undo-row">
+              <button class="icon-btn" id="undoBtn" type="button" aria-label="Angre" disabled>
+                <span class="mini-icon undo" aria-hidden="true"></span>
+              </button>
+              <button class="icon-btn" id="redoBtn" type="button" aria-label="Gjør om" disabled>
+                <span class="mini-icon redo" aria-hidden="true"></span>
+              </button>
+              <button class="icon-btn" id="clearBtn" type="button" aria-label="Slett markeringer" disabled>
+                <span class="mini-icon trash" aria-hidden="true"></span>
+              </button>
+              <button class="icon-btn wide hidden" id="finishPolylineBtn" type="button">Ferdig</button>
+            </div>
+            <div class="zoom-row">
+              <button class="icon-btn" id="zoomOutBtn" type="button" aria-label="Zoom ut">
+                <span class="mini-icon minus" aria-hidden="true"></span>
+              </button>
+              <output id="zoomReadout" aria-live="polite">100%</output>
+              <button class="icon-btn" id="zoomInBtn" type="button" aria-label="Zoom inn">
+                <span class="mini-icon plus" aria-hidden="true"></span>
+              </button>
+              <button class="icon-btn wide" id="fitBtn" type="button" aria-label="Tilpass bilde">Tilpass</button>
+            </div>
+          </div>
+
+          <div class="stage" id="stage">
+            <canvas id="markupCanvas" aria-label="Markeringslerret"></canvas>
+            <div class="empty-state" id="emptyState">
+              <button class="btn primary large" id="emptyImportBtn" type="button">
+                <span class="icon upload" aria-hidden="true"></span>
+                <span>Importer skjermbilde</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="properties">
+          <div class="tool-panel hidden" id="objectTypePanel">
+            <div class="section-title">Objekter</div>
+            <div class="object-grid" id="objectPalette" role="group" aria-label="Objekttype">
+              <button class="object-choice active" type="button" data-object-kind="pole">S</button>
+              <button class="object-choice" type="button" data-object-kind="transformer">FS</button>
+              <button class="object-choice" type="button" data-object-kind="lowVoltage">LS</button>
+              <button class="object-choice" type="button" data-object-kind="highVoltage">HS</button>
+              <button class="object-choice" type="button" data-object-kind="fuseBox">KV</button>
+              <button class="object-choice" type="button" data-object-kind="netstation">NS</button>
+            </div>
+            <button class="btn add-object-btn" id="addObjectBtn" type="button">Nytt objekt</button>
+          </div>
+
+          <div class="tool-panel hidden" id="selectedPanel">
+            <div class="section-title">Valgt</div>
+            <div class="selected-card" id="selectedCard">
+              <p>Ingen valgt</p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="mobile-dock">
+        <div class="dock-row scroll tool-scroll" role="group" aria-label="Mobilverktøy">
+          <button class="dock-tool active" type="button" data-tool="select">Velg</button>
+          <button class="dock-tool" type="button" data-tool="line">Linje</button>
+          <button class="dock-tool" type="button" data-tool="polyline">Poly</button>
+          <button class="dock-tool" type="button" data-tool="measure">Meter</button>
+          <button class="dock-tool" type="button" data-tool="pipe">Rør</button>
+          <button class="dock-tool" type="button" data-tool="object">Objekt</button>
+          <button class="dock-tool" type="button" data-tool="label">Tekst</button>
+          <button class="dock-tool" type="button" data-tool="signature">Sign</button>
+          <button class="dock-tool danger" type="button" data-tool="erase">Slett</button>
+        </div>
+        <div class="dock-row scroll" id="mobilePalette" aria-label="Mobilpalett"></div>
+        <div class="mobile-edit hidden" id="mobileEditPanel"></div>
+        <div class="dock-row mobile-options">
+          <label class="mobile-toggle">
+            <input id="mobileSnapToggle" type="checkbox" data-snap-toggle />
+            <span>Snap 45°</span>
+          </label>
+          <label class="mobile-toggle">
+            <input id="mobileObjectSnapToggle" type="checkbox" data-object-snap-toggle checked />
+            <span>Objektsnap</span>
+          </label>
+          <label class="mobile-toggle">
+            <input id="mobileKeepToolToggle" type="checkbox" data-keep-tool-toggle />
+            <span>Behold verktøy</span>
+          </label>
+        </div>
+      </footer>
+
+      <input id="imageInput" type="file" accept="image/*" hidden />
+      <input id="projectInput" type="file" accept="application/json,.json" hidden />
+      <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+      <div class="prompt-backdrop hidden" id="promptDialog" role="dialog" aria-modal="true" aria-labelledby="promptTitle">
+        <div class="prompt-panel">
+          <label class="field">
+            <span id="promptTitle">Inndata</span>
+            <input id="promptInput" />
+          </label>
+          <div class="prompt-actions">
+            <button class="btn" id="promptCancelBtn" type="button">Avbryt</button>
+            <button class="btn primary" id="promptOkBtn" type="button">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="color-backdrop hidden" id="colorDialog" role="dialog" aria-modal="true" aria-labelledby="colorDialogTitle">
+        <div class="color-panel">
+          <div class="dialog-heading compact">
+            <div>
+              <h2 id="colorDialogTitle">Velg farge</h2>
+              <p>Trykk OK for å bruke fargen</p>
+            </div>
+          </div>
+          <div class="color-preview-box">
+            <span id="colorPreview" aria-hidden="true"></span>
+            <label class="field">
+              <span>Hex</span>
+              <input id="colorHexInput" maxlength="7" inputmode="text" />
+            </label>
+          </div>
+          <div class="color-swatch-row" id="colorPresetRow" role="group" aria-label="Fargevalg"></div>
+          <label class="field">
+            <span>Fargetone</span>
+            <input id="colorHueInput" type="range" min="0" max="360" step="1" />
+          </label>
+          <label class="field">
+            <span>Metning</span>
+            <input id="colorSatInput" type="range" min="0" max="100" step="1" />
+          </label>
+          <label class="field">
+            <span>Lysstyrke</span>
+            <input id="colorLightInput" type="range" min="8" max="92" step="1" />
+          </label>
+          <div class="prompt-actions">
+            <button class="btn" id="colorCancelBtn" type="button">Avbryt</button>
+            <button class="btn primary" id="colorOkBtn" type="button">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="signature-backdrop hidden" id="signatureDialog" role="dialog" aria-modal="true" aria-labelledby="signatureDialogTitle">
+        <div class="signature-panel">
+          <label class="field">
+            <span id="signatureDialogTitle">Navn</span>
+            <input id="signatureDialogName" />
+          </label>
+          <div class="signature-draw-box">
+            <canvas id="signatureCanvas" width="620" height="220" aria-label="Tegn underskrift"></canvas>
+          </div>
+          <div class="signature-actions">
+            <button class="btn" id="signatureClearBtn" type="button">Tøm</button>
+            <button class="btn" id="signatureCancelBtn" type="button">Avbryt</button>
+            <button class="btn primary" id="signatureSaveBtn" type="button">Lagre</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-backdrop hidden" id="recentDialog" role="dialog" aria-modal="true" aria-labelledby="recentTitle">
+        <div class="recent-panel">
+          <div class="dialog-heading">
+            <div>
+              <h2 id="recentTitle">Nylige skisser</h2>
+              <p>Automatisk lagret på denne enheten</p>
+            </div>
+            <button class="icon-btn" id="recentCloseBtn" type="button" aria-label="Lukk">×</button>
+          </div>
+          <div class="recent-list" id="recentList"></div>
+          <div class="recent-actions">
+            <button class="btn" id="recentOpenFileBtn" type="button">Åpne fil</button>
+            <button class="btn primary" id="recentNewBtn" type="button">Nytt skjermbilde</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="app.js?v=36"></script>
+  </body>
+</html>
